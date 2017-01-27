@@ -38,7 +38,7 @@ make_page = (name) ->
     # FIXME make a site config
     theme = 'cornsilk'
     manifest = get_manifest name
-    page = create_page_html name, manifest, theme, clients
+    page = create_page_html name, manifest, theme
     write_page page, res, next
   
 module.exports =
