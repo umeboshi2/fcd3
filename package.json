@@ -2,7 +2,8 @@
   "name": "fcd3",
   "version": "0.0.0",
   "description": "simple xml to html",
-  "main": "app.js",
+  "private": true,
+  "main": "start.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
