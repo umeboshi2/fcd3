@@ -3,10 +3,6 @@ Backbone = require 'backbone'
 Marionette = require 'backbone.marionette'
 tc = require 'teacup'
 
-#if window.__agent
-#  console.warn '__agent is present'
-#  window.__agent.start Backbone, Marionette
-
   
 require 'bootstrap'
 

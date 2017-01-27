@@ -13,6 +13,11 @@ applets =
       name: 'Bumblr'
       url: '#bumblr'
     }
+    {
+      appname: 'xmlst'
+      name: 'XMLst'
+      url: '#xmlst'
+    }
   ]
 appmodel.set 'applets', applets
 
@@ -34,7 +39,7 @@ applet_menus = [
   {
     label: 'Stuff'
     single_applet: true
-    applets: ['bumblr', 'bumblr']
+    applets: ['bumblr', 'xmlst']
   }
   ]
 
@@ -49,6 +54,7 @@ MainChannel.reply 'main:app:appmodel', ->
 #require 'agate/src/applets/frontdoor/main'
 require '../applets/frontdoor/main'
 require '../applets/bumblr/main'
+require '../applets/xmlst/main'
 
 app = prepare_app appmodel
 
