@@ -1,10 +1,10 @@
 Backbone = require 'backbone'
 Marionette = require 'backbone.marionette'
-Backbone.localStorage = require 'backbone.localstorage'
 PageableCollection = require 'backbone.paginator'
 
-#Util = require 'agate/src/apputil'
-{ BaseLocalStorageCollection } = require 'agate/src/lscollection'
+xml = require 'xml2js-parser'
+$ = require 'jquery'
+
 
 Models = require './models'
 
@@ -12,11 +12,51 @@ Models = require './models'
 MainChannel = Backbone.Radio.channel 'global'
 BumblrChannel = Backbone.Radio.channel 'bumblr'
 
-baseURL = '//api.tumblr.com/v2'
+xml_url = 'https://availablerentals.managebuilding.com/Resident/PublicPages/XMLRentals.ashx?listings=all'
+
+if __DEV__
+  xml_url = '/assets/XMLRentals.xml'
   
-class PhotoPostCollection extends Backbone.Collection
-  url: () ->
-    "#{baseURL}/#{@id}/posts/photo?callback=?"
+
+# setup custom parser
+# explicitArray only makes arrays when there
+# is more than one member
+Parser = new xml.Parser
+  explicitArray: false
+  
+
+
+class MainListingsModel extends Backbone.Model
+  url: xml_url
+
+  fetch: (options) ->
+    console.log "OPTIONS", options
+    super
+      dataType: 'text'
+        
+  parse: (response, options) ->
+    #console.log "RESPONSE", response
+    console.log "OPTIONS", options
+    xmlr = Parser.parseStringSync response
+    window.xmlresp = xmlr
+    console.log "XMLRESPONSE", xmlr
+    xmlr
+
+class ListingsCollection extends Backbone.Collection
+  url: xml_url
+  
+  fetch: (options) ->
+    console.log "OPTIONS", options
+    super
+      dataType: 'text'
+      
+  parse: (response, options) ->
+    #console.log "RESPONSE", response
+    console.log "OPTIONS", options
+    xmlr = Parser.parseStringSync response
+    window.xmlresp = xmlr
+    console.log "XMLRESPONSE", xmlr
+    xmlr
     
 class BlogPosts extends PageableCollection
   mode: 'server'
@@ -47,39 +87,5 @@ class BlogPosts extends PageableCollection
     offset: () ->
       @state.currentPage * @state.pageSize
       
-make_blog_post_collection = (base_hostname) ->
-  settings = BumblrChannel.request 'get_app_settings'
-  api_key = settings.get 'consumer_key'
-  bp = new BlogPosts
-  bp.api_key = api_key
-  bp.base_hostname = base_hostname
-  return bp
-  
-req = 'make_blog_post_collection'
-BumblrChannel.reply req, (base_hostname) ->
-  make_blog_post_collection base_hostname
-  
-
-class LocalBlogCollection extends BaseLocalStorageCollection
-  model: Models.BlogInfo
-   # FIXME: This is ugly!
-  add_blog: (name) ->
-    sitename = "#{name}.tumblr.com"
-    model = new Models.BlogInfo
-    model.set 'id', sitename
-    model.set 'name', name
-    model.api_key = @api_key
-    @add model
-    @save()
-    model.fetch()
-    return model
-        
-local_blogs = new LocalBlogCollection
-settings = BumblrChannel.request 'get_app_settings'
-api_key = settings.get 'consumer_key'
-local_blogs.api_key = api_key
-BumblrChannel.reply 'get_local_blogs', ->
-  local_blogs
-   
 module.exports =
   PhotoPostCollection: PhotoPostCollection

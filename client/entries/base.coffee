@@ -70,24 +70,15 @@ MainChannel.on 'mainpage:displayed', ->
   # aregion = MainChannel.request 'main:app:get-region', aregion
   # aregion.show view
 
-  # current user should already be fetched before
-  # any view is shown
-  user = MainChannel.request 'current-user'
-  view = new UserMenuView
-    model: user
   app = MainChannel.request 'main:app:object'
   appmodel = MainChannel.request 'main:app:appmodel'
-  
-  #applets = {}
-  #for applet in appmodel.applets
-  #  applets[applet.appname] = applet
-  #for entry in appmodel.applet_menus
-  #  do (entry) ->
-  #    model = new Backbone.Model entry
-      
-      
 
+  # current user should already be fetched before
+  # any view is shown
   if appmodel.get 'hasUser'
+    user = MainChannel.request 'current-user'
+    view = new UserMenuView
+      model: user
     navbar = app.getView().getChildView('navbar')
     navbar.showChildView 'usermenu', view
   

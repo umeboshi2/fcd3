@@ -21,8 +21,8 @@ sidebar_template = make_sidebar_template()
 side_bar_data = new Backbone.Model
   entries: [
     {
-      name: 'List Blogs'
-      url: '#xmlst/listblogs'
+      name: 'List Properties'
+      url: '#xmlst/listprops'
     }
     {
       name: 'Settings'
@@ -55,38 +55,28 @@ class Controller extends MainController
     response = @main_model.fetch()
     response.done =>
       console.log "SUCCESS", @main_model
-      @list_blogs()
+      @list_properties()
     response.error =>
       console.log "ERROR", @main_model
     console.log "response", response
     
-  show_mainview: () ->
-    @_make_sidebar()
-    view = new MiscViews.MainBumblrView
-    @_show_content view
-    Util.scroll_top_fast()
-    
-  show_dashboard: () ->
-    @_make_sidebar()
-    view = new MiscViews.BumblrDashboardView
-    @_show_content view
-    Util.scroll_top_fast()
-      
-  list_blogs: () ->
+  list_properties: () ->
     @setup_layout_if_needed()
     @_make_sidebar()
     require.ensure [], () =>
-      console.log "sidebar created"
-      blogs = BumblrChannel.request 'get_local_blogs'
-      console.log 'blogs', blogs
+      #console.log "sidebar created"
+      physical_property = @main_model.get 'PhysicalProperty'
+      properties = physical_property.Property
+      console.log "Properties", properties
       SimpleBlogListView = require './views/bloglist'
       view = new SimpleBlogListView
-        collection: blogs
-      @_show_content view
+        collection: properties
+      #@_show_content view
+      @layout.showChildView 'content', view
     # name the chunk
-    , 'bumblr-view-list-blogs'
+    , 'xmlst-view-list-props'
     
-  view_blog: (blog_id) ->
+  view_property: (blog_id) ->
     #console.log 'view blog called for ' + blog_id
     @setup_layout_if_needed()
     @_make_sidebar()
@@ -98,23 +88,12 @@ class Controller extends MainController
       response.done =>
         view = new BlogPostListView
           collection: collection
-        @_show_content view
+        #@_show_content view
+        @layout.showChildView 'content', view
         Util.scroll_top_fast()
     # name the chunk
-    , 'bumblr-view-blog-view'
+    , 'xmlst-view-prop-view'
     
-  add_new_blog: () ->
-    @setup_layout_if_needed()
-    @_make_sidebar()
-    require.ensure [], () =>
-      NewBlogFormView = require './views/newblog'
-      view = new NewBlogFormView
-      @_show_content view
-      Util.scroll_top_fast()
-    # name the chunk
-    , 'bumblr-view-add-blog'
-    
-          
   settings_page: () ->
     @setup_layout_if_needed()
     @_make_sidebar()
@@ -122,10 +101,11 @@ class Controller extends MainController
       ConsumerKeyFormView = require './views/settingsform'
       settings = BumblrChannel.request 'get_app_settings'
       view = new ConsumerKeyFormView model:settings
-      @_show_content view
+      #@_show_content view
+      @layout.showChildView 'content', view
       Util.scroll_top_fast()
     # name the chunk
-    , 'bumblr-view-settings'
+    , 'xmlst-view-settings'
     
 module.exports = Controller
 

@@ -11,10 +11,8 @@ class Router extends BootStrapAppRouter
   appRoutes:
     'xmlst': 'start'
     'xmlst/settings': 'settings_page'
-    'xmlst/dashboard': 'show_dashboard'
-    'xmlst/listblogs': 'list_blogs'
-    'xmlst/viewblog/:id': 'view_blog'
-    'xmlst/addblog' : 'add_new_blog'
+    'xmlst/listprops': 'list_properties'
+    'xmlst/viewprop/:id': 'view_property'
 
     
 MainChannel.reply 'applet:xmlst:route', () ->
