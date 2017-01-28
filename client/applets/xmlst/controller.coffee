@@ -1,12 +1,14 @@
 $ = require 'jquery'
 Backbone = require 'backbone'
 Marionette = require 'backbone.marionette'
+tc = require 'teacup'
 
 Util = require 'agate/src/apputil'
 { MainController } = require 'agate/src/controllers'
 { make_sidebar_template } = require 'agate/src/templates/layout'
 
 Models = require './models'
+Collections = require './collections'
 
 MiscViews = require './views/misc'
 SideBarView = require './views/sidebar'
@@ -14,43 +16,39 @@ SideBarView = require './views/sidebar'
 
 BumblrChannel = Backbone.Radio.channel 'bumblr'
 
-sidebar_template = make_sidebar_template()
+
+class HeaderView extends Backbone.Marionette.View
+  template: tc.renderable (model) ->
+    tc.strong model.title
+    
+make_header_view = (title) ->
+  model = new Backbone.Model
+    title: title
+  view = new HeaderView
+    model: model
+  view
   
 
-
-side_bar_data = new Backbone.Model
-  entries: [
-    {
-      name: 'List Properties'
-      url: '#xmlst/listprops'
-    }
-    {
-      name: 'Settings'
-      url: '#xmlst/settings'
-    }
-    ]
-
 class XMLstLayout extends Backbone.Marionette.View
-  template: sidebar_template
+  template: tc.renderable ->
+    tc.div '#header'
+    tc.div '#main-content'
   regions:
+    header: '#header'
     sidebar: '#sidebar'
     content: '#main-content'
     
   
 class Controller extends MainController
-  main_model: new Models.ListingsModel
+  main_model: new Collections.MainListingsModel
   layoutClass: XMLstLayout
-  sidebarclass: SideBarView
-  sidebar_model: side_bar_data
   
   set_header: (title) ->
-    header = $ '#header'
-    header.text title
+    view = make_header_view title
+    @layout.showChildView 'header', view
     
   start: ->
-    console.log 'xmlst start called'
     @setup_layout_if_needed()
-    @set_header 'XML Listings'
     window.mainModel = @main_model
     response = @main_model.fetch()
     response.done =>
@@ -58,19 +56,31 @@ class Controller extends MainController
       @list_properties()
     response.error =>
       console.log "ERROR", @main_model
-    console.log "response", response
+    #console.log "response", response
+    
     
   list_properties: () ->
     @setup_layout_if_needed()
-    @_make_sidebar()
+    if __DEV__
+      #crcoll = Collections.make_custom_records @main_model
+      #console.log 'crcoll', crcoll
+      #pcoll = Collections.make_property_models @main_model
+      #console.log 'pcoll', pcoll
+      #window.pcoll = pcoll
+      #window.crcoll = crcoll
+      cmblist = Collections.make_combined_list @main_model
+      window.cmblist = cmblist
+      console.log 'cmblist', cmblist
+      
     require.ensure [], () =>
+      console.log 'list_properties'
       #console.log "sidebar created"
       physical_property = @main_model.get 'PhysicalProperty'
       properties = physical_property.Property
-      console.log "Properties", properties
+      #console.log "Properties", properties
       SimpleBlogListView = require './views/bloglist'
       view = new SimpleBlogListView
-        collection: properties
+        collection: cmblist
       #@_show_content view
       @layout.showChildView 'content', view
     # name the chunk
@@ -79,7 +89,6 @@ class Controller extends MainController
   view_property: (blog_id) ->
     #console.log 'view blog called for ' + blog_id
     @setup_layout_if_needed()
-    @_make_sidebar()
     require.ensure [], () =>
       host = blog_id + '.tumblr.com'
       collection = BumblrChannel.request 'make_blog_post_collection', host
@@ -96,7 +105,6 @@ class Controller extends MainController
     
   settings_page: () ->
     @setup_layout_if_needed()
-    @_make_sidebar()
     require.ensure [], () =>
       ConsumerKeyFormView = require './views/settingsform'
       settings = BumblrChannel.request 'get_app_settings'

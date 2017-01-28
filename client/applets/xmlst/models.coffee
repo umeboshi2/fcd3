@@ -22,16 +22,16 @@ class ListingsModel extends Backbone.Model
   url: xml_url
 
   fetch: (options) ->
-    console.log "OPTIONS", options
+    #console.log "OPTIONS", options
     super
       dataType: 'text'
         
   parse: (response, options) ->
     #console.log "RESPONSE", response
-    console.log "OPTIONS", options
+    #console.log "OPTIONS", options
     xmlr = Parser.parseStringSync response
     window.xmlresp = xmlr
-    console.log "XMLRESPONSE", xmlr
+    #console.log "XMLRESPONSE", xmlr
     xmlr
     
     
