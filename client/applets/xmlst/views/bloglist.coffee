@@ -37,6 +37,22 @@ class BlogModal extends Backbone.Marionette.View
 class SimpleBlogInfoView extends Backbone.Marionette.View
   template: simple_blog_info
 
+class SimplePropInfoView extends Backbone.Marionette.View
+  template: tc.renderable (model) ->
+    tc.div '.propinfo.listview-list-entry', ->
+      name = model.property.Floorplan.Name
+      tc.a href:"#xmlst/viewprop/#{model.custom.id}", name
+      
+
+class PropListView extends Backbone.Marionette.CompositeView
+  childView: SimplePropInfoView
+  template: tc.renderable () ->
+    tc.div '#proplist-container.listview-list'
+  childViewContainer: '#proplist-container'
+  ui:
+    proplist: '#proplist-container'
+
+
 class SimpleBlogListView extends Backbone.Marionette.CompositeView
   childView: SimpleBlogInfoView
   template: simple_blog_list
@@ -86,4 +102,4 @@ class SimpleBlogListView extends Backbone.Marionette.CompositeView
       button.hide()
     blog.hover handlerIn, handlerOut
 
-module.exports = SimpleBlogListView
+module.exports = PropListView

@@ -4,7 +4,7 @@ PageableCollection = require 'backbone.paginator'
 
 qs = require 'qs'
 xml = require 'xml2js-parser'
-$ = require 'jquery'
+#$ = require 'jquery'
 
 
 Models = require './models'
@@ -36,22 +36,6 @@ class MainListingsModel extends Backbone.Model
     super
       dataType: 'text'
         
-  parse: (response, options) ->
-    #console.log "RESPONSE", response
-    console.log "OPTIONS", options
-    xmlr = Parser.parseStringSync response
-    window.xmlresp = xmlr
-    console.log "XMLRESPONSE", xmlr
-    xmlr
-
-class ListingsCollection extends Backbone.Collection
-  url: xml_url
-  
-  fetch: (options) ->
-    console.log "OPTIONS", options
-    super
-      dataType: 'text'
-      
   parse: (response, options) ->
     #console.log "RESPONSE", response
     console.log "OPTIONS", options
@@ -128,9 +112,13 @@ make_combined_list = (xmlmodel) ->
   cmbarray = []
   for crmodel in crcoll.models
     pmodel = pcoll.get crmodel.id
+    delist = new Date(crmodel.get('DelistDate')).getTime()
+    now = new Date().getTime()
+    active = (delist - now) > 0
     obj =
       custom: crmodel.attributes
       property: pmodel.attributes
+      active: active
     cmbarray.push obj
   #return cmbarray
   return new CombinedListing cmbarray
