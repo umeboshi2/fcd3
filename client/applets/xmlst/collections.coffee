@@ -4,10 +4,6 @@ PageableCollection = require 'backbone.paginator'
 
 qs = require 'qs'
 xml = require 'xml2js-parser'
-#$ = require 'jquery'
-
-
-Models = require './models'
 
 
 MainChannel = Backbone.Radio.channel 'global'

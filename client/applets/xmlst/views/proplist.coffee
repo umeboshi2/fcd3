@@ -34,14 +34,26 @@ simple_blog_list = tc.renderable () ->
 class BlogModal extends Backbone.Marionette.View
   template: blog_dialog_view
 
-class SimpleBlogInfoView extends Backbone.Marionette.View
-  template: simple_blog_info
-
 class SimplePropInfoView extends Backbone.Marionette.View
   template: tc.renderable (model) ->
-    tc.div '.propinfo.listview-list-entry', ->
+    #tc.div '.propinfo.listview-list-entry', ->
+    level = 'info'
+    if not model.active
+      level = 'danger'
+    tc.div ".propinfo.alert.alert-#{level}", ->
       name = model.property.Floorplan.Name
       tc.a href:"#xmlst/viewprop/#{model.custom.id}", name
+      #console.log model.property.Floorplan.File
+      #photo = model.property.Floorplan.File[0].Src
+      files = model.property.Floorplan.File
+      # FIXME find thumbnails
+      if files? and false
+        console.log "model file", model, files
+        if Array.isArray files
+          photo = files[0].Src
+        else
+          photo = files.Src
+        tc.img src:photo
       
 
 class PropListView extends Backbone.Marionette.CompositeView
@@ -51,55 +63,5 @@ class PropListView extends Backbone.Marionette.CompositeView
   childViewContainer: '#proplist-container'
   ui:
     proplist: '#proplist-container'
-
-
-class SimpleBlogListView extends Backbone.Marionette.CompositeView
-  childView: SimpleBlogInfoView
-  template: simple_blog_list
-  childViewContainer: '#bloglist-container'
-  ui:
-    blogs: '#bloglist-container'
-
-  onDomRefresh: () ->
-    console.log 'onDomRefresh called on SimpleBlogListView'
-    @masonry = new Masonry "#bloglist-container",
-      gutter: 2
-      isInitLayout: false
-      itemSelector: '.blog'
-      columnWidth: 100
-    delete_buttons = $ '.delete-blog-button'
-    delete_buttons.hide()
-    delete_buttons.on 'click', (event) =>
-      target = $ event.currentTarget
-      blog = target.attr 'blog'
-      id = "#{blog}.tumblr.com"
-      model = @collection.get id
-      model.destroy()
-      #console.log "Delete #{blog}"
-      @masonry.reloadItems()
-      @masonry.layout()
-    @set_layout()
-
-  set_layout: ->
-    @masonry.reloadItems()
-    @masonry.layout()
-    blog = $ '.blog'
-    handlerIn = (event) ->
-      window.enterevent = event
-      button = $(event.target).find '.delete-blog-button'
-      button.show()
-      # set button to disappear after two seconds
-      # without this, some buttons appear to stick
-      # and stay when the mouse jumps between entries
-      # too quickly.
-      # FIXME configure time elsewhere?
-      setTimeout () ->
-        button.hide()
-      , 2000 
-    handlerOut = (event) ->
-      window.leaveevent = event
-      button = $(event.target).find '.delete-blog-button'
-      button.hide()
-    blog.hover handlerIn, handlerOut
 
 module.exports = PropListView

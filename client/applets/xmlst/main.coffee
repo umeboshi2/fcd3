@@ -9,8 +9,7 @@ XmlstChannel = Backbone.Radio.channel 'xmlst'
 
 class Router extends BootStrapAppRouter
   appRoutes:
-    'xmlst': 'start'
-    'xmlst/settings': 'settings_page'
+    '': 'start'
     'xmlst/listprops': 'list_properties'
     'xmlst/viewprop/:id': 'view_property'
 

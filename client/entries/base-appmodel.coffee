@@ -40,6 +40,7 @@ appmodel = new BaseAppModel
     url: '/'
   appView: MainPageLayout
   navbarView: NavbarView
+  frontdoor_app: 'xmlst'
 
   #FIXME
   container: 'container-fluid'
