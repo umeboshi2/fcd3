@@ -10,9 +10,6 @@ UserMenuView = require './user-menu-view'
 
 initialize_page = require 'agate/src/app-initpage'
 
-#require 'agate/src/clipboard'
-#require 'agate/src/messages'
-#require '../static-documents'
 
 MainChannel = Backbone.Radio.channel 'global'
 
@@ -21,7 +18,6 @@ if __DEV__
   console.warn "__DEV__", __DEV__, "DEBUG", DEBUG
   Backbone.Radio.DEBUG = true
   #FIXME
-  window.dchnnl = DocChannel
   window.chnnl = MainChannel
   
 
