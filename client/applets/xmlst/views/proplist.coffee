@@ -8,9 +8,10 @@ tc = require 'teacup'
 { navigate_to_url } = require 'agate/src/apputil'
 
 BumblrChannel = Backbone.Radio.channel 'bumblr'
+AppChannel = Backbone.Radio.channel 'xmlst'
 
 ########################################
-blog_dialog_view = tc.renderable (blog) ->
+modal_dialog_view = tc.renderable (blog) ->
   tc.div '.modal-header', ->
     tc.h2 'This is a modal!'
   tc.div '.modal-body', ->
@@ -19,32 +20,34 @@ blog_dialog_view = tc.renderable (blog) ->
     tc.button '#modal-cancel-button.btn', 'cancel'
     tc.button '#modal-ok-button.btn.btn-default', 'Ok'
 
-simple_blog_info = tc.renderable (blog) ->
-  tc.div '.blog.listview-list-entry', ->
-    tc.a href:'#bumblr/viewblog/' + blog.name, blog.name
-    tc.i ".delete-blog-button.fa.fa-close.btn.btn-default.btn-xs",
-    blog:blog.name
-
-simple_blog_list = tc.renderable () ->
-  tc.div ->
-    tc.a '.btn.btn-default', href:'#bumblr/addblog', "Add blog"
-    tc.div '#bloglist-container.listview-list'
-
 ########################################
-class BlogModal extends Backbone.Marionette.View
-  template: blog_dialog_view
+class ModalView extends Backbone.Marionette.View
+  template: modal_dialog_view
 
 class SimplePropInfoView extends Backbone.Marionette.View
+  ui:
+    propinfo: '.propinfo'
+
+  triggers:
+    'click @ui.propinfo': 'click:propinfo'
+
+  events:
+    'click @ui.propinfo': 'view_property'
+    
+  view_property: (event) ->
+    # FIXME - determine proper target for event
+    unitid = event.currentTarget.attributes.unitid.value
+    AppChannel.request 'view-property', unitid
+    
   template: tc.renderable (model) ->
     #tc.div '.propinfo.listview-list-entry', ->
     level = 'info'
     if not model.active
       level = 'danger'
-    tc.div ".propinfo.alert.alert-#{level}", ->
+    tc.div ".propinfo.alert.alert-#{level}", unitid:model.custom.id, ->
       name = model.property.Floorplan.Name
-      tc.a href:"#xmlst/viewprop/#{model.custom.id}", name
-      #console.log model.property.Floorplan.File
-      #photo = model.property.Floorplan.File[0].Src
+      #tc.a href:"#xmlst/viewprop/#{model.custom.id}", name
+      tc.span name
       files = model.property.Floorplan.File
       # FIXME find thumbnails
       if files? and false

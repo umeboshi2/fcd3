@@ -2,19 +2,18 @@ $ = require 'jquery'
 Backbone = require 'backbone'
 Marionette = require 'backbone.marionette'
 tc = require 'teacup'
+#xml = require 'xml2js'
+xml = require 'xml2js-parseonly/src/xml2js'
 
 Util = require 'agate/src/apputil'
 { MainController } = require 'agate/src/controllers'
 { make_sidebar_template } = require 'agate/src/templates/layout'
 
-Models = require './models'
 Collections = require './collections'
 
-MiscViews = require './views/misc'
-SideBarView = require './views/sidebar'
 
+AppChannel = Backbone.Radio.channel 'xmlst'
 
-BumblrChannel = Backbone.Radio.channel 'bumblr'
 
 
 class HeaderView extends Backbone.Marionette.View
@@ -29,6 +28,10 @@ make_header_view = (title) ->
     model: model
   view
   
+xml_url = 'https://availablerentals.managebuilding.com/Resident/PublicPages/XMLRentals.ashx?listings=all'
+# use local file for testing
+if __DEV__
+  xml_url = '/assets/XMLRentals.xml'
 
 class XMLstLayout extends Backbone.Marionette.View
   template: tc.renderable ->
@@ -38,70 +41,75 @@ class XMLstLayout extends Backbone.Marionette.View
     header: '#header'
     sidebar: '#sidebar'
     content: '#main-content'
-    
+
 class Controller extends MainController
-  main_model: new Collections.MainListingsModel
   layoutClass: XMLstLayout
-  combined_collection: null
+  combined_collection: undefined
   
-  
+
+  get_xml_listing: (cb) ->
+    xhr = Backbone.ajax
+      type: 'GET'
+      dataType: 'text'
+      url: xml_url
+    xhr.done =>
+      @parse_xml_listing xhr, cb
+
+  # FIXME
+  # double arrows to preserve link to
+  # controller
+  parse_xml_listing: (xhr, cb) =>
+    #console.log "parse_xml_listing", xhr
+    Parser = new xml.Parser
+      explicitArray: false
+      async: false
+    xhr.done =>
+      Parser.parseString xhr.responseText, (err, json) =>
+        model = new Backbone.Model json
+        @combined_collection = Collections.make_combined_list model
+        cb()
+      
+    
+      
   set_header: (title) ->
     view = make_header_view title
     @layout.showChildView 'header', view
 
-  get_property_list: (callback) ->
-    response = @main_model.fetch()
-    response.done =>
-      @combined_collection = Collections.make_combined_list @main_model
-      if __DEV__
-        console.log "SUCCESS", @main_model
-      callback()
-    response.error =>
-      if __DEV__
-        console.log "ERROR", @main_model
-        console.warn "Make a dialog or send error message"
-    
   start: ->
     @setup_layout_if_needed()
-    response = @main_model.fetch()
-    response.done =>
-      @combined_collection = Collections.make_combined_list @main_model
-      if __DEV__
-        console.log "SUCCESS", @main_model
+    # start with list_properties
+    if not @combined_collection?
+      # grab xml if collection undefined
+      @get_xml_listing @list_properties
+    else
+      # data exists, go ahead and make list
       @list_properties()
-    response.error =>
-      if __DEV__
-        console.log "ERROR", @main_model
-        console.warn "Make a dialog or send error message"
-    #@get_property_list @list_properties
-    
-  list_properties: () ->
+      
+  list_properties: () =>
     @setup_layout_if_needed()
     @set_header 'Property Listings'
     cmblist = @combined_collection
-      
     require.ensure [], () =>
-      console.log 'list_properties'
-      physical_property = @main_model.get 'PhysicalProperty'
-      properties = physical_property.Property
       PropListView = require './views/proplist'
       view = new PropListView
         collection: cmblist
       @layout.showChildView 'content', view
+      Util.scroll_top_fast()
     # name the chunk
     , 'xmlst-view-list-props'
-    
+
   view_property: (prop_id) ->
-    #console.log 'view blog called for ' + blog_id
     @setup_layout_if_needed()
+    @set_header 'Property View'
+    #console.log "Combined_Collection", @combined_collection
+    model = @combined_collection.get Number prop_id
+    #console.log "model is", model
     require.ensure [], () =>
-      BlogPostListView = require './views/postlist'
-      response = collection.fetch()
-      response.done =>
-        view = new BlogPostListView
-          collection: collection
-        @layout.showChildView 'content', view
-        Util.scroll_top_fast()
+      PropView = require './views/propview'
+      view = new PropView
+        model: model
+      @layout.showChildView 'content', view
+      Util.scroll_top_fast()
     # name the chunk
     , 'xmlst-view-prop-view'
     

@@ -50,10 +50,4 @@ module.exports =
       test: /masonry-layout/,
       loader: 'imports?define=>false&this=>window'
     }
-    {
-      test: /xml2js-parser/,
-      loader: 'babel-loader'
-      query:
-        presets: ['es2015']
-    }
   ]

@@ -1,9 +1,11 @@
 BootStrapAppRouter = require 'agate/src/bootstrap_router'
 
+
 Controller = require './controller'
 
+
 MainChannel = Backbone.Radio.channel 'global'
-XmlstChannel = Backbone.Radio.channel 'xmlst'
+AppChannel = Backbone.Radio.channel 'xmlst'
 
 
 
@@ -16,6 +18,10 @@ class Router extends BootStrapAppRouter
     
 MainChannel.reply 'applet:xmlst:route', () ->
   controller = new Controller MainChannel
+  AppChannel.reply 'view-property', (prop_id) ->
+    controller.view_property prop_id
+  AppChannel.reply 'list-properties', ->
+    controller.list_properties()
   router = new Router
     controller: controller
     

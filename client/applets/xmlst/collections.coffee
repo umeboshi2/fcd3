@@ -3,42 +3,8 @@ Marionette = require 'backbone.marionette'
 PageableCollection = require 'backbone.paginator'
 
 qs = require 'qs'
-xml = require 'xml2js-parser'
-
 
 MainChannel = Backbone.Radio.channel 'global'
-BumblrChannel = Backbone.Radio.channel 'bumblr'
-
-xml_url = 'https://availablerentals.managebuilding.com/Resident/PublicPages/XMLRentals.ashx?listings=all'
-# use local file for testing
-if __DEV__
-  xml_url = '/assets/XMLRentals.xml'
-  
-# setup custom parser
-# explicitArray only makes arrays when there
-# is more than one member
-Parser = new xml.Parser
-  explicitArray: false
-  
-
-
-# MainListingsModel fetches and parses xml list
-# and convert to js objects
-class MainListingsModel extends Backbone.Model
-  url: xml_url
-
-  fetch: (options) ->
-    console.log "OPTIONS", options
-    super
-      dataType: 'text'
-        
-  parse: (response, options) ->
-    #console.log "RESPONSE", response
-    console.log "OPTIONS", options
-    xmlr = Parser.parseStringSync response
-    window.xmlresp = xmlr
-    console.log "XMLRESPONSE", xmlr
-    xmlr
 
 class PropertyModel extends Backbone.Model
 
@@ -95,7 +61,7 @@ make_property_models = (xmlmodel) ->
     purl = qs.parse prop.Floorplan.FloorplanAvailabilityURL
     prop.id = purl.unitid
     if prop.id in model_ids
-      console.log "Dupe id", count, prop
+      console.warn "Dupe id", count, prop
     model_ids.push prop.id
     model = new PropertyModel prop
     models.push model
@@ -115,13 +81,13 @@ make_combined_list = (xmlmodel) ->
       custom: crmodel.attributes
       property: pmodel.attributes
       active: active
+      id: crmodel.id
     cmbarray.push obj
   #return cmbarray
   return new CombinedListing cmbarray
   
       
 module.exports =
-  MainListingsModel: MainListingsModel
   PropertyCollection: PropertyCollection
   CustomRecordCollection: CustomRecordCollection
   make_custom_records: make_custom_records
