@@ -52,17 +52,39 @@ class PropertyView extends Backbone.Marionette.View
   template: tc.renderable (model) ->
     window.curprop = model
     property = model.property
-    name = property.Floorplan.Name
-    deposit = property.Floorplan.Deposit.Amount.ValueRange.$.Exact
+    #name = property.Floorplan.Name
+    name = property.PropertyID.MarketingName
     tc.div ->
-      tc.a ".view-property-list", "Back to list"
-    tc.table ->
-      tc.tr ->
-        tc.td "Address"
-        tc.td name
-      tc.tr ->
-        tc.td "Deposit"
-        tc.td deposit
-      
-
+      tc.button ".view-property-list.btn.btn-default", "Back to list"
+    address = property.PropertyID.Address  
+    tc.dl '.dl-horizontal', ->
+      tc.dt "Address"
+      #tc.dd name
+      tc.dd ->
+            tc.address ->
+              tc.text address.Address
+              tc.br()
+              tc.text "#{address.City}, #{address.State}  #{address.PostalCode}"
+      tc.dt "Units Availabile"
+      tc.dd property.Information.UnitCount
+      tc.dt "Description"
+      tc.dd property.Information.LongDescription
+      window.RR = property.Floorplan.Room
+      if property.Floorplan.Room.length
+        # list comprehension (makes Array)
+        rooms = (r.Comment for r in property.Floorplan.Room)
+        tc.dt "Rooms"
+        tc.dd rooms.join ', '
+      deposit = property.Floorplan.Deposit.Amount.ValueRange.$.Exact
+      tc.dt "Deposit"
+      tc.dd "$#{deposit}"
+      rent = property.Floorplan.EffectiveRent
+      tc.dt "Rent"
+      min_rent = rent.$.Min
+      max_rent = rent.$.Max
+      if min_rent != max_rent
+        tc.dd "$#{rent.$.Min} - $#{rent.$.Max}"
+      else
+        tc.dd "$#{min_rent}"
+        
 module.exports = PropertyView
