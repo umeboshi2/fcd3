@@ -47,18 +47,18 @@ class Controller extends MainController
   combined_collection: undefined
   
 
-  get_xml_listing: (cb) ->
+  get_xml_listing: (cb, args) ->
     xhr = Backbone.ajax
       type: 'GET'
       dataType: 'text'
       url: xml_url
     xhr.done =>
-      @parse_xml_listing xhr, cb
+      @parse_xml_listing xhr, cb, args
 
   # FIXME
   # double arrows to preserve link to
   # controller
-  parse_xml_listing: (xhr, cb) =>
+  parse_xml_listing: (xhr, cb, args) =>
     #console.log "parse_xml_listing", xhr
     Parser = new xml.Parser
       explicitArray: false
@@ -67,7 +67,7 @@ class Controller extends MainController
       Parser.parseString xhr.responseText, (err, json) =>
         model = new Backbone.Model json
         @combined_collection = Collections.make_combined_list model
-        cb()
+        cb args
       
     
       
@@ -80,10 +80,15 @@ class Controller extends MainController
     # start with list_properties
     if not @combined_collection?
       # grab xml if collection undefined
-      @get_xml_listing @list_properties
+      # DEBUG - go straight to prop description
+      if __DEV__
+        @get_xml_listing @view_property, 210881
+      else
+        @get_xml_listing @list_properties
     else
       # data exists, go ahead and make list
       @list_properties()
+      #@view_property 210881
       
   list_properties: () =>
     @setup_layout_if_needed()
@@ -95,7 +100,9 @@ class Controller extends MainController
     @layout.showChildView 'content', view
     Util.scroll_top_fast()
 
-  view_property: (prop_id) ->
+  view_property: (prop_id) =>
+    if __DEV__
+      console.log "prop_id", prop_id
     @setup_layout_if_needed()
     @set_header 'Property View'
     #console.log "Combined_Collection", @combined_collection
