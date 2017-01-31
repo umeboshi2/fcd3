@@ -36,7 +36,10 @@ if __DEV__
 class XMLstLayout extends Backbone.Marionette.View
   template: tc.renderable ->
     tc.div '#header'
-    tc.div '#main-content'
+    tc.div '#main-content', ->
+      tc.h1 ->
+        tc.text 'Loading ...'
+        tc.i '.fa.fa-spinner.fa-spin'
   regions:
     header: '#header'
     sidebar: '#sidebar'
