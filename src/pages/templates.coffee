@@ -19,14 +19,14 @@ base_page = tc.renderable (appfile, manifest, theme) ->
               tc.text 'Loading ...'
               tc.i '.fa.fa-spinner.fa-spin'
           tc.div '.col-sm-2'
-      tc.script
-        type: 'text/javascript'
-        charset: 'utf-8'
-        src: "build/#{manifest['vendor.js']}"
-      tc.script
-        type: 'text/javascript'
-        charset: 'utf-8'
-        src: "build/#{manifest['agate.js']}"
+      #tc.script
+      #  type: 'text/javascript'
+      #  charset: 'utf-8'
+      #  src: "build/#{manifest['vendor.js']}"
+      #tc.script
+      #  type: 'text/javascript'
+      #  charset: 'utf-8'
+      #  src: "build/#{manifest['agate.js']}"
       tc.script
         type: 'text/javascript'
         charset: 'utf-8'

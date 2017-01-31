@@ -1,6 +1,5 @@
 Backbone = require 'backbone'
 Marionette = require 'backbone.marionette'
-Masonry = require 'masonry-layout'
 tc = require 'teacup'
 
 #require 'jquery-ui'

@@ -10,13 +10,11 @@ UserMenuView = require './user-menu-view'
 
 initialize_page = require 'agate/src/app-initpage'
 
-require 'agate/src/clipboard'
-require 'agate/src/messages'
-require '../static-documents'
+#require 'agate/src/clipboard'
+#require 'agate/src/messages'
+#require '../static-documents'
 
 MainChannel = Backbone.Radio.channel 'global'
-MessageChannel = Backbone.Radio.channel 'messages'
-DocChannel = Backbone.Radio.channel 'static-documents'
 
 
 if __DEV__

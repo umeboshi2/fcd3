@@ -1,7 +1,5 @@
 Backbone = require 'backbone'
 Marionette = require 'backbone.marionette'
-Masonry = require 'masonry-layout'
-imagesLoaded = require 'imagesloaded'
 tc = require 'teacup'
 
 

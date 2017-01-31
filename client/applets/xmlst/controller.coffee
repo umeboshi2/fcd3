@@ -89,14 +89,11 @@ class Controller extends MainController
     @setup_layout_if_needed()
     @set_header 'Property Listings'
     cmblist = @combined_collection
-    require.ensure [], () =>
-      PropListView = require './views/proplist'
-      view = new PropListView
-        collection: cmblist
-      @layout.showChildView 'content', view
-      Util.scroll_top_fast()
-    # name the chunk
-    , 'xmlst-view-list-props'
+    PropListView = require './views/proplist'
+    view = new PropListView
+      collection: cmblist
+    @layout.showChildView 'content', view
+    Util.scroll_top_fast()
 
   view_property: (prop_id) ->
     @setup_layout_if_needed()
@@ -104,14 +101,11 @@ class Controller extends MainController
     #console.log "Combined_Collection", @combined_collection
     model = @combined_collection.get Number prop_id
     #console.log "model is", model
-    require.ensure [], () =>
-      PropView = require './views/propview'
-      view = new PropView
-        model: model
-      @layout.showChildView 'content', view
-      Util.scroll_top_fast()
-    # name the chunk
-    , 'xmlst-view-prop-view'
+    PropView = require './views/propview'
+    view = new PropView
+      model: model
+    @layout.showChildView 'content', view
+    Util.scroll_top_fast()
     
 module.exports = Controller
 
