@@ -6,13 +6,36 @@ tc = require 'teacup'
   
 require 'bootstrap'
 
-UserMenuView = require './user-menu-view'
-
-initialize_page = require 'agate/src/app-initpage'
-
+{ BootstrapModalRegion } = require 'agate/src/regions'
 
 MainChannel = Backbone.Radio.channel 'global'
 
+_MainLayoutTemplate = tc.renderable (container) ->
+  #tc.div '#navbar-view-container'
+  #tc.div '#editor-bar-container'
+  tc.div ".#{container}", ->
+    #tc.div '.row', ->
+    #  tc.div '.col-md-10', ->
+    #    tc.div '#messages'
+    tc.div '#applet-content.row'
+  tc.div '#footer'
+  tc.div '#modal'
+
+MainLayoutTemplate = ->
+  _MainLayoutTemplate 'container'
+
+MainFluidLayoutTemplate = ->
+  _MainLayoutTemplate 'container-fluid'
+  
+class MainPageLayout extends Backbone.Marionette.View
+  template: MainFluidLayoutTemplate
+  regions:
+    #messages: '#messages'
+    #navbar: '#navbar-view-container'
+    modal: BootstrapModalRegion
+    applet: '#applet-content'
+    footer: '#footer'
+    
 
 if __DEV__
   console.warn "__DEV__", __DEV__, "DEBUG", DEBUG
@@ -20,7 +43,23 @@ if __DEV__
   #FIXME
   window.chnnl = MainChannel
   
-
+# taken from agate
+# removed navbar and messages
+initialize_page = (app) ->
+  #regions = MainChannel.request 'main:app:regions'
+  appmodel = MainChannel.request 'main:app:appmodel'
+  # create layout view
+  if appmodel.has 'appView'
+    AppView = appmodel.get 'appView'
+  else
+    AppView = Views.MainPageLayout
+    
+  layout_opts = {}
+  if appmodel.has 'layout_template'
+    layout_opts.template = appmodel.get 'layout_template'
+  layout = new AppView layout_opts
+  app.showView layout
+  
 
 
 class AppletMenuView extends Backbone.Marionette.View
@@ -71,7 +110,8 @@ MainChannel.on 'mainpage:displayed', ->
   # any view is shown
   if appmodel.get 'hasUser'
     user = MainChannel.request 'current-user'
-    view = new UserMenuView
+    #view = new UserMenuView
+    view = new Backbone.Marionette.View
       model: user
     navbar = app.getView().getChildView('navbar')
     navbar.showChildView 'usermenu', view

@@ -6,8 +6,6 @@ Backbone = require 'backbone'
 BaseAppModel = require 'agate/src/appmodel'
 { BootstrapModalRegion } = require 'agate/src/regions'
 
-NavbarView = require './navbar'
-
 
 tc = require 'teacup'
 
@@ -26,7 +24,7 @@ class MainPageLayout extends Backbone.Marionette.View
   template: layout_template
   regions:
     messages: '#messages'
-    navbar: '#navbar-view-container'
+    #navbar: '#navbar-view-container'
     modal: new BootstrapModalRegion
     applet: '#applet-content'
     footer: '#footer'
@@ -39,7 +37,6 @@ appmodel = new BaseAppModel
     name: 'FCD#3'
     url: '/'
   appView: MainPageLayout
-  navbarView: NavbarView
   frontdoor_app: 'xmlst'
 
   #FIXME
