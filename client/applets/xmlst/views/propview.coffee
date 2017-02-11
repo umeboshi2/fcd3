@@ -7,36 +7,59 @@ tc = require 'teacup'
 
 AppChannel = Backbone.Radio.channel 'xmlst'
 
-########################################
-simple_post_page_view = tc.renderable () ->
-  tc.div '.mytoolbar.row', ->
-    tc.ul '.pager', ->
-      tc.li '.previous', ->
-        tc.i '#prev-page-button.fa.fa-arrow-left.btn.btn-default'
-      tc.li ->
-        tc.i '#slideshow-button.fa.fa-play.btn.btn-default'
-      tc.li '.next', ->
-        tc.i '#next-page-button.fa.fa-arrow-right.btn.btn-default'
-    #icon '#prev-page-button.fa.fa-arrow-left.btn.btn-default.pull-left'
-    #icon '#slideshow-button.fa.fa-play.btn.btn-default'
-  tc.div '#posts-container.row'
+make_file_list = (model) ->
+  files = model.property.Floorplan.File
+  # FIXME find thumbnails
+  photo = undefined
+  if files?
+    #console.log "model file", model, files
+    if Array.isArray files
+      photo = files[0].Src
+    else
+      console.log "NOT ARRAY", model
+      photo = files.Src
+  files
 
-simple_post_view = tc.renderable (post) ->
-  tc.div '.listview-list-entry', ->
-    #p ->
-    # a href:post.post_url, target:'_blank', post.blog_name
-    tc.span ->
-      #for photo in post.photos
-      photo = post.photos[0]
-      current_width = 0
-      current_size = null
-      for size in photo.alt_sizes
-        if size.width > current_width and size.width < 250
-          current_size = size
-          current_width = size.width
-      size = current_size 
-      tc.a href:post.post_url, target:'_blank', ->
-        tc.img src:size.url
+
+make_address = tc.renderable (model) ->
+  address = model.property.PropertyID.Address  
+  tc.dt "Address"
+  tc.dd ->
+    tc.address ->
+      tc.text address.Address
+      tc.br()
+      tc.text "#{address.City}, #{address.State}  #{address.PostalCode}"
+  
+
+make_rent = tc.renderable (model) ->
+  rent = model.property.Floorplan.EffectiveRent
+  tc.dt "Rent"
+  min_rent = rent.$.Min
+  max_rent = rent.$.Max
+  if min_rent != max_rent
+    tc.dd "$#{rent.$.Min} - $#{rent.$.Max}"
+  else
+    tc.dd "$#{min_rent}"
+  
+
+make_desc_list = tc.renderable (model) ->
+  property = model.property
+  tc.dl '.dl-horizontal', ->
+    make_address model
+    if property.Floorplan.Room.length
+      # list comprehension (makes Array)
+      rooms = (r.Comment for r in property.Floorplan.Room)
+      tc.dt "Rooms"
+      tc.dd rooms.join ', '
+    tc.dt "Units Availabile"
+    tc.dd property.Information.UnitCount
+    deposit = property.Floorplan.Deposit.Amount.ValueRange.$.Exact
+    tc.dt "Deposit"
+    tc.dd "$#{deposit}"
+    make_rent model
+    tc.dt "Description"
+    tc.dd property.Information.LongDescription
+    
 
 ########################################
 class PropertyView extends Backbone.Marionette.View
@@ -50,41 +73,19 @@ class PropertyView extends Backbone.Marionette.View
     AppChannel.request 'list-properties'
     
   template: tc.renderable (model) ->
-    window.curprop = model
-    property = model.property
+    #window.curprop = model
     #name = property.Floorplan.Name
-    name = property.PropertyID.MarketingName
-    tc.div ->
+    #name = property.PropertyID.MarketingName
+    #tc.div ->
+    #  tc.button ".view-property-list.btn.btn-default", "Back to list"
+    tc.div '.col-sm-10.col-sm-offset-1', ->
+      make_desc_list model
+      tc.hr()
+      tc.ul ->
+        for f in make_file_list model
+          console.log f
+          tc.li f.Src
       tc.button ".view-property-list.btn.btn-default", "Back to list"
-    address = property.PropertyID.Address  
-    tc.dl '.dl-horizontal', ->
-      tc.dt "Address"
-      #tc.dd name
-      tc.dd ->
-            tc.address ->
-              tc.text address.Address
-              tc.br()
-              tc.text "#{address.City}, #{address.State}  #{address.PostalCode}"
-      tc.dt "Units Availabile"
-      tc.dd property.Information.UnitCount
-      tc.dt "Description"
-      tc.dd property.Information.LongDescription
-      window.RR = property.Floorplan.Room
-      if property.Floorplan.Room.length
-        # list comprehension (makes Array)
-        rooms = (r.Comment for r in property.Floorplan.Room)
-        tc.dt "Rooms"
-        tc.dd rooms.join ', '
-      deposit = property.Floorplan.Deposit.Amount.ValueRange.$.Exact
-      tc.dt "Deposit"
-      tc.dd "$#{deposit}"
-      rent = property.Floorplan.EffectiveRent
-      tc.dt "Rent"
-      min_rent = rent.$.Min
-      max_rent = rent.$.Max
-      if min_rent != max_rent
-        tc.dd "$#{rent.$.Min} - $#{rent.$.Max}"
-      else
-        tc.dd "$#{min_rent}"
+        
         
 module.exports = PropertyView

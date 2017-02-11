@@ -7,7 +7,6 @@ xml = require 'xml2js-parseonly/src/xml2js'
 
 Util = require 'agate/src/apputil'
 { MainController } = require 'agate/src/controllers'
-{ make_sidebar_template } = require 'agate/src/templates/layout'
 
 Collections = require './collections'
 
@@ -42,7 +41,7 @@ class XMLstLayout extends Backbone.Marionette.View
         tc.i '.fa.fa-spinner.fa-spin'
   regions:
     header: '#header'
-    sidebar: '#sidebar'
+    #sidebar: '#sidebar'
     content: '#main-content'
 
 class Controller extends MainController
@@ -66,11 +65,10 @@ class Controller extends MainController
     Parser = new xml.Parser
       explicitArray: false
       async: false
-    xhr.done =>
-      Parser.parseString xhr.responseText, (err, json) =>
-        model = new Backbone.Model json
-        @combined_collection = Collections.make_combined_list model
-        cb args
+    Parser.parseString xhr.responseText, (err, json) =>
+      model = new Backbone.Model json
+      @combined_collection = Collections.make_combined_list model
+      cb args
       
     
       
@@ -84,7 +82,7 @@ class Controller extends MainController
     if not @combined_collection?
       # grab xml if collection undefined
       # DEBUG - go straight to prop description
-      if __DEV__
+      if __DEV__ and false
         @get_xml_listing @view_property, 210881
       else
         @get_xml_listing @list_properties
