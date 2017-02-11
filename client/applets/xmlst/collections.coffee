@@ -5,6 +5,7 @@ PageableCollection = require 'backbone.paginator'
 qs = require 'qs'
 
 MainChannel = Backbone.Radio.channel 'global'
+AppChannel = Backbone.Radio.channel 'xmlst'
 
 class PropertyModel extends Backbone.Model
 
@@ -85,7 +86,22 @@ make_combined_list = (xmlmodel) ->
     cmbarray.push obj
   #return cmbarray
   return new CombinedListing cmbarray
+
+get_photo_1_src = (model) ->
+  files = model.property.Floorplan.File
+  if files?
+    if Array.isArray files
+      photo = files[0].Src
+    else
+      photo = files.Src
+    return photo
+  # "coming soon" png
+  "http://foo.bar/thumbs/fd9e3b9bda7f40388982966f0c853be8.png"
+
+AppChannel.reply 'get-main-photo', (model) ->
+  get_photo_1_src model
   
+         
       
 module.exports =
   PropertyCollection: PropertyCollection

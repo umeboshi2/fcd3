@@ -1,7 +1,8 @@
 Backbone = require 'backbone'
 Marionette = require 'backbone.marionette'
 tc = require 'teacup'
-
+Url = require 'url'
+MainChannel = Backbone.Radio.channel 'global'
 AppChannel = Backbone.Radio.channel 'xmlst'
 
 ########################################
@@ -56,12 +57,18 @@ make_propinfo = tc.renderable (model) ->
       else
         photo = files.Src
       tc.img src:photo
-    tc.div '.panel-content', ->
-      make_rent_rooms_row model
-      #tc.p name
-      
-  
-
+    tc.div '.panel-content.media', ->
+      tc.div '.media-left', ->
+        src = AppChannel.request 'get-main-photo', model
+        url = Url.parse src
+        parts = url.path.split '/'
+        filename = parts[parts.length - 1]
+        thumb = "/thumbs/#{filename}"
+        tc.img '.media-object', src:thumb
+      tc.div '.media-body', ->
+        make_rent_rooms_row model
+        #tc.p name
+        
 ########################################
 
 class SimplePropInfoView extends Backbone.Marionette.View
