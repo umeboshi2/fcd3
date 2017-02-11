@@ -53,6 +53,14 @@ run_server = () ->
   else
     app.use '/build', gzipStatic(path.join __dirname, '../build')
 
+  # serve thumbnails
+  if process.env.NODE_ENV == 'development'
+    thumbsdir = path.join __dirname, '../thumbs'
+  else
+    thumbsdir = "#{process.env.OPENSHIFT_DATA_DIR}thumbs"
+
+  app.use '/thumbs', express.static(thumbsdir)
+  
   app.get '/', pages.make_page 'index'
 
   server = http.createServer app
