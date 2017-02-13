@@ -1,9 +1,9 @@
 Backbone = require 'backbone'
 Marionette = require 'backbone.marionette'
 tc = require 'teacup'
+  
+{ get_thumb_src } = require '../util'
 
-
-#require 'jquery-ui'
 
 AppChannel = Backbone.Radio.channel 'xmlst'
 
@@ -81,10 +81,12 @@ class PropertyView extends Backbone.Marionette.View
     tc.div '.col-sm-10.col-sm-offset-1', ->
       make_desc_list model
       tc.hr()
-      tc.ul ->
+      tc.div '.row', ->
         for f in make_file_list model
-          console.log f
-          tc.li f.Src
+          src = get_thumb_src f.Src
+          tc.div '.col-sm-3', ->
+            tc.a '.thumbnail', href:f.Src, ->
+              tc.img src:src
       tc.button ".view-property-list.btn.btn-default", "Back to list"
         
         

@@ -2,6 +2,10 @@ Backbone = require 'backbone'
 Marionette = require 'backbone.marionette'
 tc = require 'teacup'
 Url = require 'url'
+
+
+{ get_thumb_url } = require '../util'
+
 MainChannel = Backbone.Radio.channel 'global'
 AppChannel = Backbone.Radio.channel 'xmlst'
 
@@ -49,21 +53,9 @@ make_propinfo = tc.renderable (model) ->
     name = model.property.Floorplan.Name
     tc.div ".panel-heading.panel-#{level}", name
     files = model.property.Floorplan.File
-    # FIXME find thumbnails
-    if files? and false
-      console.log "model file", model, files
-      if Array.isArray files
-        photo = files[0].Src
-      else
-        photo = files.Src
-      tc.img src:photo
     tc.div '.panel-content.media', ->
       tc.div '.media-left', ->
-        src = AppChannel.request 'get-main-photo', model
-        url = Url.parse src
-        parts = url.path.split '/'
-        filename = parts[parts.length - 1]
-        thumb = "/thumbs/#{filename}"
+        thumb = get_thumb_url model
         tc.img '.media-object', src:thumb
       tc.div '.media-body', ->
         make_rent_rooms_row model
