@@ -36,7 +36,7 @@ write_page = (page, res, next) ->
 make_page = (name) ->
   (req, res, next) ->
     # FIXME make a site config
-    theme = 'cornsilk'
+    theme = 'custom'
     manifest = get_manifest name
     page = create_page_html name, manifest, theme
     write_page page, res, next
