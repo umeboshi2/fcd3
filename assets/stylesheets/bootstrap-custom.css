@@ -7333,3 +7333,67 @@ button.close {
     display: none !important;
   }
 }
+.listview-list {
+  background: #fff;
+  padding: 0.3em;
+}
+
+.listview-list-entry {
+  background: #f2f2f2;
+  margin: 0.5em;
+  border-style: solid;
+  border-width: 0.1em;
+  border-color: #fff;
+  padding: 0.3em;
+}
+.listview-list-entry a {
+  color: #333333;
+}
+
+.listview-header {
+  -moz-border-radius: 0.5em;
+  -webkit-border-radius: 0.5em;
+  border-radius: 0.5em;
+  background: #e6e6e6;
+  color: #333333;
+  text-align: center;
+  font-size: 1.5em;
+  border-style: solid;
+  border-width: 0.2em;
+  border-color: white;
+}
+
+.mini-calendar {
+  width: 20em;
+  margin: 0 auto;
+  font-family: "Droid Sans";
+  font-size: 0.5em;
+  padding: 0.5em;
+}
+.mini-calendar .fc-header td {
+  padding: 0.1em;
+  vertical-align: bottom;
+}
+.mini-calendar .fc-header-title h2 {
+  font-size: 1.1em;
+  font-family: "Cabin";
+  white-space: normal !important;
+}
+.mini-calendar .fc-view-month .fc-event, .mini-calendar .fc-view-agendaWeek .fc-event {
+  font-size: 1em;
+  overflow: hidden;
+  height: 1em;
+  margin: 0.0em;
+}
+.mini-calendar .fc-view-agendaWeek .fc-event-vert {
+  font-size: 0;
+  overflow: hidden;
+  width: 2px !important;
+}
+.mini-calendar .fc-agenda-axis {
+  width: 20px !important;
+  font-size: .7em;
+}
+.mini-calendar .fc-button-content {
+  padding: 0;
+}
