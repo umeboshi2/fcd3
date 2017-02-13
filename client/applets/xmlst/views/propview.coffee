@@ -7,17 +7,15 @@ tc = require 'teacup'
 
 AppChannel = Backbone.Radio.channel 'xmlst'
 
+
+
+nopixsrc = "http://foo.bar/thumbs/fd9e3b9bda7f40388982966f0c853be8.png"
+
 make_file_list = (model) ->
   files = model.property.Floorplan.File
   # FIXME find thumbnails
-  photo = undefined
-  if files?
-    #console.log "model file", model, files
-    if Array.isArray files
-      photo = files[0].Src
-    else
-      console.log "NOT ARRAY", model
-      photo = files.Src
+  if not files?
+    files = []
   files
 
 
@@ -73,11 +71,9 @@ class PropertyView extends Backbone.Marionette.View
     AppChannel.request 'list-properties'
     
   template: tc.renderable (model) ->
-    #window.curprop = model
-    #name = property.Floorplan.Name
-    #name = property.PropertyID.MarketingName
-    #tc.div ->
-    #  tc.button ".view-property-list.btn.btn-default", "Back to list"
+    if __DEV__
+      window.curprop = model
+      #console.log "Current model", model
     tc.div '.col-sm-10.col-sm-offset-1', ->
       tc.div '.row', ->
         tc.div ".view-property-list.col-sm-12.btn.btn-default.btn-justified", ->
@@ -86,11 +82,17 @@ class PropertyView extends Backbone.Marionette.View
         make_desc_list model
       tc.hr()
       tc.div '.row', ->
-        for f in make_file_list model
-          src = get_thumb_src f.Src
+        flist = make_file_list model
+        if not flist.length
           tc.div '.col-sm-3', ->
-            tc.a '.thumbnail', href:f.Src, ->
-              tc.img src:src
+            tc.div '.thumbnail', ->
+              tc.img src:get_thumb_src nopixsrc
+        else
+          for f in flist
+            src = get_thumb_src f.Src
+            tc.div '.col-sm-3', ->
+              tc.a '.thumbnail', download:'', href:f.Src, ->
+                tc.img src:src
         
         
 module.exports = PropertyView

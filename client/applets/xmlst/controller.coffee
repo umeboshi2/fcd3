@@ -18,7 +18,9 @@ AppChannel = Backbone.Radio.channel 'xmlst'
 class HeaderView extends Backbone.Marionette.View
   template: tc.renderable (model) ->
     #tc.strong model.title
-    tc.div '.listview-header', model.title
+    tc.div '.listview-header', ->
+      tc.img src:'/assets/images/appleton-logo.jpg'
+      tc.div model.title
     
 make_header_view = (title) ->
   model = new Backbone.Model
@@ -68,6 +70,8 @@ class Controller extends MainController
     Parser.parseString xhr.responseText, (err, json) =>
       model = new Backbone.Model json
       @combined_collection = Collections.make_combined_list model
+      if __DEV__
+        window.cmblist = @combined_collection
       cb args
       
     
@@ -102,7 +106,7 @@ class Controller extends MainController
     Util.scroll_top_fast()
 
   view_property: (prop_id) =>
-    if __DEV__
+    if __DEV__ and false
       console.log "prop_id", prop_id
     @setup_layout_if_needed()
     @set_header 'Property View'

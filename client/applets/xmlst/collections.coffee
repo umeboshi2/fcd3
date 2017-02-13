@@ -58,9 +58,11 @@ make_property_models = (xmlmodel) ->
   count = 0
   for prop in parray
     count += 1
-    #prop.id = prop.Identification.IDValue
-    purl = qs.parse prop.Floorplan.FloorplanAvailabilityURL
+    # FIXME split url fails if no "?"
+    purl = qs.parse prop.Floorplan.FloorplanAvailabilityURL.split('?')[1]
     prop.id = purl.unitid
+    prop.listing_id = purl.listingId
+    prop.building_id = purl.buildingid
     if prop.id in model_ids
       console.warn "Dupe id", count, prop
     model_ids.push prop.id
@@ -83,8 +85,8 @@ make_combined_list = (xmlmodel) ->
       property: pmodel.attributes
       active: active
       id: crmodel.id
+      delist: delist
     cmbarray.push obj
-  #return cmbarray
   return new CombinedListing cmbarray
 
 get_photo_1_src = (model) ->

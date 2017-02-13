@@ -4,7 +4,7 @@ tc = require 'teacup'
 Url = require 'url'
 
 
-{ get_thumb_url } = require '../util'
+Util = require '../util'
 
 MainChannel = Backbone.Radio.channel 'global'
 AppChannel = Backbone.Radio.channel 'xmlst'
@@ -14,7 +14,7 @@ AppChannel = Backbone.Radio.channel 'xmlst'
 make_rent_rooms_row = tc.renderable (model) ->
   property = model.property
   rent = property.Floorplan.EffectiveRent
-  tc.div '.row', ->
+  tc.div '.rental-info-row.row', ->
     tc.div '.col-sm-1', ->
       tc.dl ->
         active_listing = if model.active then 'active' else 'inactive'
@@ -47,48 +47,107 @@ make_rent_rooms_row = tc.renderable (model) ->
             tc.br()
             tc.text "#{address.City}, #{address.State}  #{address.PostalCode}"
 
+make_buttons = tc.renderable (model) ->
+  btn_style = '.btn.btn-default.btn-sm'
+  tc.span '.btn-group.col-sm-7.pull-right', ->
+    if __DEV__ and false
+      tc.span "#dummy.#{btn_style}", "Dummy"
+    tc.span "#local-details.#{btn_style}", "Quick Details"
+    if model.active
+      tc.span "#appleton-details.#{btn_style}", "Details (in new window)"
+      tc.span "#rental-app-button.#{btn_style}", "Rental Application"
+
 make_propinfo = tc.renderable (model) ->
   level = if model.active then "success" else "danger"
-  tc.div ".propinfo.panel.panel-#{level}", unitid:model.custom.id, ->
+  tc.div ".propinfo.panel.panel-#{level}", ->
     name = model.property.Floorplan.Name
-    tc.div ".panel-heading.panel-#{level}", name
+    tc.div ".panel-heading.panel-#{level}.row", ->
+      tc.span '.col-sm-5', name
     files = model.property.Floorplan.File
     tc.div '.panel-content.media', ->
       tc.div '.media-left', ->
-        thumb = get_thumb_url model
+        thumb = Util.get_thumb_url model
         tc.img '.media-object', src:thumb
       tc.div '.media-body', ->
         make_rent_rooms_row model
-        #tc.p name
-        
+        tc.div '.row', ->
+          make_buttons model
+    if __DEV__ and false
+      unitid = model.custom.id
+      propid = model.property.PropertyID.Identification.IDValue
+      tc.span '.alert.alert-warning', ->
+        tc.small ->
+          tc.strong "UnitID #{unitid}, PropertyID #{propid}"
+  if __DEV__ and false
+    url = model.property.Floorplan.FloorplanAvailabilityURL
+    tc.span '.alert.alert-warning', ->
+      tc.small ->
+        tc.strong url
 ########################################
 
 class SimplePropInfoView extends Backbone.Marionette.View
   ui:
     propinfo: '.propinfo'
+    panel_content: '.panel-content'
+    rental_info_row: '.rental-info-row'
+    media_left: '.media-left'
+    media_body: '.media-body'
+    panel_heading: '.panel-heading'
+    rental_btn: '#rental-app-button'
+    local_btn: '#local-details'
+    appleton_btn: '#appleton-details'
 
-  triggers:
-    'click @ui.propinfo': 'click:propinfo'
+  clickable_local_view: [
+    'rental_info_row'
+    'media_left'
+    'local_btn']
 
-  events:
-    'click @ui.propinfo': 'view_property'
+  base_events:
+    'click @ui.rental_btn': 'open_rental_application'
+    'click @ui.appleton_btn': 'open_listing_page'
+    'click @ui.panel_heading': 'toggle_content'
+    
+  events: ->
+    events = @base_events
+    for area in @clickable_local_view
+      events["click @ui.#{area}"] = 'view_property'
+    return events
+
+  toggle_content: ->
+    @ui.panel_content.toggle()
+    
+  get_unit_id: ->
+    @ui.propinfo.attr 'unitid'
+
+  get_listing_id: ->
+    prop = @model.get 'property'
+    prop.listing_id
     
   view_property: (event) ->
-    # FIXME - determine proper target for event
-    unitid = event.currentTarget.attributes.unitid.value
-    AppChannel.request 'view-property', unitid
+    AppChannel.request 'view-property', @model.id
+
+  open_rental_application: (event) ->
+    appurl = Util.rental_app_link @get_listing_id()
+    window.open(appurl, '_blank')
+
+  open_listing_page: (event) ->
+    prop = @model.get 'property'
+    window.open(prop.Floorplan.FloorplanAvailabilityURL, '_blank')
+    
+    
     
   template: tc.renderable (model) ->
-    #tc.div '.propinfo.listview-list-entry', ->
-    level = 'info'
-    if not model.active
-      level = 'danger'
     make_propinfo model
 
   onDomRefresh: ->
-    @ui.propinfo.css
+    for area in @clickable_local_view
+      @ui[area].css
+        cursor: 'pointer'
+    @ui.panel_heading.css
       cursor: 'pointer'
-    
+    if not @model.get 'active'
+      @ui.panel_content.hide()
+      
 class PropListView extends Backbone.Marionette.CompositeView
   childView: SimplePropInfoView
   template: tc.renderable () ->
