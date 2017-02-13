@@ -2,7 +2,7 @@ Backbone = require 'backbone'
 Marionette = require 'backbone.marionette'
 tc = require 'teacup'
   
-{ get_thumb_src } = require '../util'
+Util = require '../util'
 
 
 AppChannel = Backbone.Radio.channel 'xmlst'
@@ -63,10 +63,20 @@ make_desc_list = tc.renderable (model) ->
 class PropertyView extends Backbone.Marionette.View
   ui:
     proplist: '.view-property-list'
+    rental_btn: '#rental-app-button'
 
   events:
     'click @ui.proplist': 'list_properties'
+    'click @ui.rental_btn': 'open_rental_application'
 
+  open_rental_application: (event) ->
+    appurl = Util.rental_app_link @get_listing_id()
+    window.open(appurl, '_blank')
+
+  get_listing_id: ->
+    prop = @model.get 'property'
+    prop.listing_id
+    
   list_properties: ->
     AppChannel.request 'list-properties'
     
@@ -80,16 +90,17 @@ class PropertyView extends Backbone.Marionette.View
           tc.text "Back to list"
       tc.div '.row', ->
         make_desc_list model
+      tc.div '#rental-app-button.btn.btn-default', "Apply Now"
       tc.hr()
       tc.div '.row', ->
         flist = make_file_list model
         if not flist.length
           tc.div '.col-sm-3', ->
             tc.div '.thumbnail', ->
-              tc.img src:get_thumb_src nopixsrc
+              tc.img src:Util.get_thumb_src nopixsrc
         else
           for f in flist
-            src = get_thumb_src f.Src
+            src = Util.get_thumb_src f.Src
             tc.div '.col-sm-3', ->
               tc.a '.thumbnail', download:'', href:f.Src, ->
                 tc.img src:src

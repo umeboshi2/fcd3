@@ -55,7 +55,7 @@ make_buttons = tc.renderable (model) ->
     tc.span "#local-details.#{btn_style}", "Quick Details"
     if model.active
       tc.span "#appleton-details.#{btn_style}", "Details (in new window)"
-      tc.span "#rental-app-button.#{btn_style}", "Rental Application"
+      tc.span "#rental-app-button.#{btn_style}", "Apply Now"
 
 make_propinfo = tc.renderable (model) ->
   level = if model.active then "success" else "danger"
