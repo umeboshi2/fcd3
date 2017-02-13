@@ -37,7 +37,7 @@ make_rent_rooms_row = tc.renderable (model) ->
           tc.dd "$#{rent.$.Min} - $#{rent.$.Max}"
         else
           tc.dd "$#{min_rent}"
-    tc.div '.col-sm-3', ->
+    tc.div '.col-sm-4', ->
       tc.dl ->
         address = property.PropertyID.Address  
         tc.dt "Address"
