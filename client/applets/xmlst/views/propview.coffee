@@ -79,7 +79,11 @@ class PropertyView extends Backbone.Marionette.View
     #tc.div ->
     #  tc.button ".view-property-list.btn.btn-default", "Back to list"
     tc.div '.col-sm-10.col-sm-offset-1', ->
-      make_desc_list model
+      tc.div '.row', ->
+        tc.div ".view-property-list.col-sm-12.btn.btn-default.btn-justified", ->
+          tc.text "Back to list"
+      tc.div '.row', ->
+        make_desc_list model
       tc.hr()
       tc.div '.row', ->
         for f in make_file_list model
@@ -87,7 +91,6 @@ class PropertyView extends Backbone.Marionette.View
           tc.div '.col-sm-3', ->
             tc.a '.thumbnail', href:f.Src, ->
               tc.img src:src
-      tc.button ".view-property-list.btn.btn-default", "Back to list"
         
         
 module.exports = PropertyView
