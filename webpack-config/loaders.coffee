@@ -3,7 +3,7 @@ module.exports =
   [
     {
       test: /\.coffee$/
-      loader: 'coffee'
+      loader: 'coffee-loader'
     }
     {
       test: /\.css$/

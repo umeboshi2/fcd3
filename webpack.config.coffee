@@ -54,7 +54,6 @@ common_plugins = [
   #new webpack.optimize.CommonsChunkPlugin
   #  names: ['agate', 'vendor']
   #  filename: MultiFilename[BuildEnvironment]
-  new webpack.optimize.OccurenceOrderPlugin true
   new webpack.optimize.AggressiveMergingPlugin()
   new StatsPlugin StatsPluginFilename[BuildEnvironment], chunkModules: true
   new ManifestPlugin()

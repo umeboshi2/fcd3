@@ -67,13 +67,19 @@ gulp.task 'serve:prod', (callback) ->
       ]
   
 gulp.task 'webpack:build-prod', (callback) ->
+  statopts = 
+    colors: true
+    chunks: true
+    modules: false
+    reasons: true
+    maxModules: 9999
   # run webpack
   process.env.PRODUCTION_BUILD = 'true'
   ProdConfig = require './webpack.config'
   prodCompiler = webpack ProdConfig
   prodCompiler.run (err, stats) ->
     throw new gutil.PluginError('webpack:build-prod', err) if err
-    gutil.log "[webpack:build-prod]", stats.toString(colors: true)
+    gutil.log "[webpack:build-prod]", stats.toString statopts
     callback()
     return
   return

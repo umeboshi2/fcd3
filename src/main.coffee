@@ -49,6 +49,12 @@ run_server = () ->
       publicPath: '/build/'
       stats:
         colors: true
+        modules: false
+        chunks: true
+        #reasons: true
+        maxModules: 9999
+        progress: true
+        
     console.log "Using webpack middleware"
   else
     app.use '/build', gzipStatic(path.join __dirname, '../build')
@@ -65,7 +71,7 @@ run_server = () ->
 
   server = http.createServer app
   server.listen PORT, HOST, -> 
-    console.log "Infidel server running on #{HOST}:#{PORT}."
+    console.log "FCD#3 server running on #{HOST}:#{PORT}."
 
 
 run_server()
