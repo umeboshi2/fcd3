@@ -4,49 +4,35 @@ tc = require 'teacup'
 Url = require 'url'
 
 
-Util = require '../util'
+Hlpr = require './helpers'
 
 MainChannel = Backbone.Radio.channel 'global'
 AppChannel = Backbone.Radio.channel 'xmlst'
 
 ########################################
 
+    
 make_rent_rooms_row = tc.renderable (model) ->
   property = model.property
   rent = property.Floorplan.EffectiveRent
   tc.div '.rental-info-row.row', ->
     tc.div '.col-sm-1', ->
-      tc.dl ->
-        active_listing = if model.active then 'active' else 'inactive'
-        tc.dt "Listing"
-        tc.dd active_listing
+      active_listing = if model.active then 'active' else 'inactive'
+      Hlpr.make_simple_dl "Listing", active_listing
     tc.div '.col-sm-2', ->
-      tc.dl ->
-        #tc.dt "Rooms"
-        if property.Floorplan.Room.length
-          # list comprehension (makes Array)
-          rooms = (r.Comment for r in property.Floorplan.Room)
-          tc.dt "Bed/Bath"
-          tc.dd rooms.join ', '
+      if property.Floorplan.Room.length
+        rooms = Hlpr.find_rooms model
+        Hlpr.make_simple_dl rooms.name, rooms.value
+      else
+        tc.strong "No Room Info"
     tc.div '.col-sm-2', ->
-      tc.dl ->
-        tc.dt "Rent"
-        min_rent = rent.$.Min
-        max_rent = rent.$.Max
-        if min_rent != max_rent
-          tc.dd "$#{rent.$.Min} - $#{rent.$.Max}"
-        else
-          tc.dd "$#{min_rent}"
+      Hlpr.make_simple_dl "Rent", "$#{Hlpr.find_rent model}"
     tc.div '.col-sm-4', ->
+      address = property.PropertyID.Address
       tc.dl ->
-        address = property.PropertyID.Address  
         tc.dt "Address"
-        tc.dd ->
-          tc.address ->
-            tc.text address.Address
-            tc.br()
-            tc.text "#{address.City}, #{address.State}  #{address.PostalCode}"
-
+        tc.dd Hlpr.make_address address
+        
 make_buttons = tc.renderable (model) ->
   btn_style = '.btn.btn-default.btn-sm'
   tc.span '.btn-group.col-sm-7.pull-right', ->
@@ -66,23 +52,13 @@ make_propinfo = tc.renderable (model) ->
     files = model.property.Floorplan.File
     tc.div '.panel-content.media', ->
       tc.div '.media-left', ->
-        thumb = Util.get_thumb_url model
-        tc.img '.media-object', src:thumb
+        thumb = Hlpr.get_thumb_url model
+        tc.img '.media-object.thumbnail', src:thumb
       tc.div '.media-body', ->
         make_rent_rooms_row model
         tc.div '.row', ->
           make_buttons model
-    if __DEV__ and false
-      unitid = model.custom.id
-      propid = model.property.PropertyID.Identification.IDValue
-      tc.span '.alert.alert-warning', ->
-        tc.small ->
-          tc.strong "UnitID #{unitid}, PropertyID #{propid}"
-  if __DEV__ and false
-    url = model.property.Floorplan.FloorplanAvailabilityURL
-    tc.span '.alert.alert-warning', ->
-      tc.small ->
-        tc.strong url
+
 ########################################
 
 class SimplePropInfoView extends Backbone.Marionette.View
@@ -113,6 +89,18 @@ class SimplePropInfoView extends Backbone.Marionette.View
       events["click @ui.#{area}"] = 'view_property'
     return events
 
+  template: tc.renderable (model) ->
+    make_propinfo model
+
+  onDomRefresh: ->
+    for area in @clickable_local_view
+      @ui[area].css
+        cursor: 'pointer'
+    @ui.panel_heading.css
+      cursor: 'pointer'
+    if not @model.get 'active'
+      @ui.panel_content.hide()
+
   toggle_content: ->
     @ui.panel_content.toggle()
     
@@ -127,26 +115,13 @@ class SimplePropInfoView extends Backbone.Marionette.View
     AppChannel.request 'view-property', @model.id
 
   open_rental_application: (event) ->
-    appurl = Util.rental_app_link @get_listing_id()
+    appurl = Hlpr.rental_app_link @get_listing_id()
     window.open(appurl, '_blank')
 
   open_listing_page: (event) ->
     prop = @model.get 'property'
     window.open(prop.Floorplan.FloorplanAvailabilityURL, '_blank')
     
-    
-    
-  template: tc.renderable (model) ->
-    make_propinfo model
-
-  onDomRefresh: ->
-    for area in @clickable_local_view
-      @ui[area].css
-        cursor: 'pointer'
-    @ui.panel_heading.css
-      cursor: 'pointer'
-    if not @model.get 'active'
-      @ui.panel_content.hide()
       
 class PropListView extends Backbone.Marionette.CompositeView
   childView: SimplePropInfoView

@@ -2,7 +2,7 @@ Backbone = require 'backbone'
 Marionette = require 'backbone.marionette'
 tc = require 'teacup'
   
-Util = require '../util'
+Hlpr = require './helpers'
 
 
 AppChannel = Backbone.Radio.channel 'xmlst'
@@ -23,38 +23,40 @@ make_address = tc.renderable (model) ->
   address = model.property.PropertyID.Address  
   tc.dt "Address"
   tc.dd ->
-    tc.address ->
-      tc.text address.Address
-      tc.br()
-      tc.text "#{address.City}, #{address.State}  #{address.PostalCode}"
-  
+    Hlpr.make_address address
 
 make_rent = tc.renderable (model) ->
-  rent = model.property.Floorplan.EffectiveRent
   tc.dt "Rent"
-  min_rent = rent.$.Min
-  max_rent = rent.$.Max
-  if min_rent != max_rent
-    tc.dd "$#{rent.$.Min} - $#{rent.$.Max}"
-  else
-    tc.dd "$#{min_rent}"
+  tc.dd "$#{Hlpr.find_rent model}"
   
 
 make_desc_list = tc.renderable (model) ->
   property = model.property
   tc.dl '.dl-horizontal', ->
+    # address
     make_address model
+    # rooms
     if property.Floorplan.Room.length
-      # list comprehension (makes Array)
-      rooms = (r.Comment for r in property.Floorplan.Room)
-      tc.dt "Rooms"
-      tc.dd rooms.join ', '
+      rooms = Hlpr.find_rooms model
+      tc.dt rooms.name
+      tc.dd rooms.value
+    # area
+    area = Hlpr.find_sq_feet model
+    if +area
+      tc.dt "Area"
+      tc.dd "#{Hlpr.find_sq_feet model} sq feet"
+    # number units
     tc.dt "Units Availabile"
     tc.dd property.Information.UnitCount
+    # deposit
     deposit = property.Floorplan.Deposit.Amount.ValueRange.$.Exact
+    if deposit.endsWith '.00'
+      deposit = deposit.slice 0, -3
     tc.dt "Deposit"
     tc.dd "$#{deposit}"
+    # rent
     make_rent model
+    # long description
     tc.dt "Description"
     tc.dd property.Information.LongDescription
     
@@ -70,7 +72,7 @@ class PropertyView extends Backbone.Marionette.View
     'click @ui.rental_btn': 'open_rental_application'
 
   open_rental_application: (event) ->
-    appurl = Util.rental_app_link @get_listing_id()
+    appurl = Hlpr.rental_app_link @get_listing_id()
     window.open(appurl, '_blank')
 
   get_listing_id: ->
@@ -95,13 +97,14 @@ class PropertyView extends Backbone.Marionette.View
       tc.div '.row', ->
         flist = make_file_list model
         if not flist.length
-          tc.div '.col-sm-3', ->
+          tc.div '.col-xs-3', ->
             tc.div '.thumbnail', ->
-              tc.img src:Util.get_thumb_src nopixsrc
+              tc.img src:'/assets/images/coming-soon-thumb.png'
+              #Hlpr.get_thumb_src nopixsrc
         else
           for f in flist
-            src = Util.get_thumb_src f.Src
-            tc.div '.col-sm-3', ->
+            src = Hlpr.get_thumb_src f.Src
+            tc.div '.col-xs-3', ->
               tc.a '.thumbnail', download:'', href:f.Src, ->
                 tc.img src:src
         
