@@ -77,7 +77,8 @@ make_combined_list = (xmlmodel) ->
   cmbarray = []
   for crmodel in crcoll.models
     pmodel = pcoll.get crmodel.id
-    delist = new Date(crmodel.get('DelistDate')).getTime()
+    delist_date = new Date(crmodel.get('DelistDate'))
+    delist = delist_date.getTime()
     now = new Date().getTime()
     active = (delist - now) > 0
     obj =
@@ -85,7 +86,7 @@ make_combined_list = (xmlmodel) ->
       property: pmodel.attributes
       active: active
       id: crmodel.id
-      delist: delist
+      delist: delist_date
     cmbarray.push obj
   return new CombinedListing cmbarray
 
