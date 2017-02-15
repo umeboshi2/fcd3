@@ -3,6 +3,12 @@ Backbone = require 'backbone'
 Marionette = require 'backbone.marionette'
 tc = require 'teacup'
 
+{ string_endswith } = require 'agate/src/apputil'
+# use polyfill for String.endsWith if needed
+if not String.prototype?.endsWith
+  String.prototype.endsWith = string_endswith
+
+
   
 require 'bootstrap'
 
