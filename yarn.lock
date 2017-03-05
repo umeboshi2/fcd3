@@ -23,7 +23,7 @@ acorn@4.X, acorn@^4.0.3, acorn@^4.0.4:
   version "4.0.11"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-4.0.11.tgz#edcda3bd937e7556410d42ed5860f67399c794c0"
 
-agate@umeboshi2/agate:
+"agate@github:umeboshi2/agate#v0.1.0":
   version "0.1.0"
   resolved "https://codeload.github.com/umeboshi2/agate/tar.gz/70c4676a4704004abea08f008f43ba6572c26caf"
   dependencies:
